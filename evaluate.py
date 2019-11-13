@@ -28,7 +28,7 @@ if use_cuda:
 else:
     print('Using CPU')
 
-from data import data_transforms
+from data import _data_transforms
 
 test_dir = args.data + '/test_images/mistery_category'
 
@@ -38,7 +38,7 @@ def pil_loader(path):
         with Image.open(f) as img:
             return img.convert('RGB')
 
-
+_, data_transforms = _data_transforms(0)
 output_file = open(args.outfile, "w")
 output_file.write("Id,Category\n")
 for f in tqdm(os.listdir(test_dir)):

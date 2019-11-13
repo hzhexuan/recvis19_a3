@@ -31,8 +31,8 @@ def _data_transforms(cutout_length):
   STD = [0.229, 0.224, 0.225]
 
   train_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.RandomCrop(224, padding=28),
+    transforms.RandomResizedCrop(224),
+    #transforms.RandomCrop(224, padding=28),
     transforms.ColorJitter(
         brightness=0.4,
         contrast=0.4,
@@ -45,7 +45,8 @@ def _data_transforms(cutout_length):
   train_transform.transforms.append(Cutout(cutout_length))
 
   valid_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize(MEAN, STD),
     ])

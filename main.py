@@ -34,9 +34,9 @@ parser.add_argument('--batch-size', type=int, default=64, metavar='B',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 10)')
-parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.025, metavar='LR',
                     help='learning rate (default: 0.01)')
-parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
+parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                     help='SGD momentum (default: 0.5)')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
@@ -105,7 +105,7 @@ criterion_train = CrossEntropyLabelSmooth(num_class, 0, frequency, True)
 
 optimizer = torch.optim.SGD(
           model.parameters(),
-          0.025,
+          args.lr,
           momentum=0.9,
           weight_decay=3e-4
           )
