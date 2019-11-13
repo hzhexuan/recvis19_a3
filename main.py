@@ -85,13 +85,17 @@ model = Network(36, 200,
 
 model.cuda()
 def get_frequency():
+    import numpy as np
     with torch.no_grad():
         count = []
+        eye = np.eye(200)
         for batch_idx, (data, target) in enumerate(train_loader):
-            count.append(target.data.cpu().numpy())
-        import numpy as np
+            d = target.data.cpu().numpy()
+            d = eye[d]
+            count.append(d)
         count = np.sum(np.array(count), axis = 0)
         return count/np.sum(count)
+
 frequency = get_frequency()
 num_class = frequency.shape[0]
 print(frequency)
