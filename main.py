@@ -91,7 +91,7 @@ def get_frequency():
         eye = np.eye(200)
         for batch_idx, (data, target) in enumerate(train_loader):
             d = target.data.cpu().numpy()
-            d = eye[d]
+            d = np.sum(eye[d], axis = -1)
             count.append(d)
         count = np.sum(np.array(count), axis = 0)
         return count/np.sum(count)
