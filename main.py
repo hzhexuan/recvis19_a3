@@ -34,19 +34,21 @@ if not os.path.isdir(args.experiment):
     os.makedirs(args.experiment)
 
 # Data initialization and loading
-from data import data_transforms
+from data import _data_transforms
 
+train_transforms, valid_transforms = _data_transforms(4)
 train_loader = torch.utils.data.DataLoader(
     datasets.ImageFolder(args.data + '/train_images',
-                         transform=data_transforms),
+                         transform=train_transforms),
     batch_size=args.batch_size, shuffle=True, num_workers=1)
 val_loader = torch.utils.data.DataLoader(
     datasets.ImageFolder(args.data + '/val_images',
-                         transform=data_transforms),
+                         transform=valid_transforms),
     batch_size=args.batch_size, shuffle=False, num_workers=1)
 
 # Neural network and optimizer
 # We define neural net in model.py so that it can be reused by the evaluate.py script
+"""
 from model import Net
 model = Net()
 if use_cuda:
@@ -54,6 +56,13 @@ if use_cuda:
     model.cuda()
 else:
     print('Using CPU')
+"""
+from genotype import DARTS
+from NN import Network
+model = Network(36, 200, 
+                      20, True, DARTS, 
+                      num_reduction = 2, 
+                      input_size = 32)
 
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
