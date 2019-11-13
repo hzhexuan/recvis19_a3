@@ -74,9 +74,10 @@ def train(epoch):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
         optimizer.zero_grad()
-        output = model(data)
+        output, output_aux = model(data)
         criterion = torch.nn.CrossEntropyLoss(reduction='mean')
         loss = criterion(output, target)
+        loss += 0.4 * criterion(output_aux, target)
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
@@ -91,7 +92,7 @@ def validation():
     for data, target in val_loader:
         if use_cuda:
             data, target = data.cuda(), target.cuda()
-        output = model(data)
+        output, _ = model(data)
         # sum up batch loss
         criterion = torch.nn.CrossEntropyLoss(reduction='mean')
         validation_loss += criterion(output, target).data.item()
