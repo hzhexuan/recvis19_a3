@@ -66,10 +66,19 @@ model = Network(36, 200,
 
 model.cuda()
 
-optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
-
+optimizer = torch.optim.SGD(
+          model.parameters(),
+          0.025,
+          momentum=0.9,
+          weight_decay=3e-4
+          )
+epochs = args.epochs
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(epochs))
+drop_path_prob = 0.2
 def train(epoch):
+    scheduler.step()
     model.train()
+    model.drop_path_prob = drop_path_prob * epoch / epochs
     for batch_idx, (data, target) in enumerate(train_loader):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
@@ -87,18 +96,20 @@ def train(epoch):
 
 def validation():
     model.eval()
+    model.drop_path_prob = 0
     validation_loss = 0
     correct = 0
     for data, target in val_loader:
         if use_cuda:
             data, target = data.cuda(), target.cuda()
-        output, _ = model(data)
-        # sum up batch loss
-        criterion = torch.nn.CrossEntropyLoss(reduction='mean')
-        validation_loss += criterion(output, target).data.item()
-        # get the index of the max log-probability
-        pred = output.data.max(1, keepdim=True)[1]
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        with torch.no_grad():
+            output, _ = model(data)
+            # sum up batch loss
+            criterion = torch.nn.CrossEntropyLoss(reduction='mean')
+            validation_loss += criterion(output, target).data.item()
+            # get the index of the max log-probability
+            pred = output.data.max(1, keepdim=True)[1]
+            correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     validation_loss /= len(val_loader.dataset)
     print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
@@ -110,5 +121,5 @@ for epoch in range(1, args.epochs + 1):
     train(epoch)
     validation()
     model_file = args.experiment + '/model_' + str(epoch) + '.pth'
-    torch.save(model.state_dict(), model_file)
-    print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' + model_file + '` to generate the Kaggle formatted csv file\n')
+torch.save(model.state_dict(), model_file)
+print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' + model_file + '` to generate the Kaggle formatted csv file\n')
