@@ -78,12 +78,12 @@ else:
 """
 from genotype import DARTS
 from NN import Network
-
+num_class = 20
 def get_frequency():
     import numpy as np
     with torch.no_grad():
         count = []
-        eye = np.eye(200)
+        eye = np.eye(20)
         for batch_idx, (data, target) in enumerate(train_loader):
             d = target.data.cpu().numpy()
             d = np.sum(eye[d], axis = 0)
@@ -93,7 +93,7 @@ def get_frequency():
 
 frequency = get_frequency()
 num_class = frequency.shape[0]
-#print(frequency)
+print(frequency)
 #print(num_class)
 model = Network(36, num_class, 
                       20, True, DARTS, 
