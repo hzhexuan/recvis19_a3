@@ -6,6 +6,25 @@ import torch.optim as optim
 from torchvision import datasets
 from torch.autograd import Variable
 from tqdm import tqdm
+class CrossEntropyLabelSmooth(nn.Module):
+
+  def __init__(self, num_classes, epsilon, frequence, weighted = True):
+    super(CrossEntropyLabelSmooth, self).__init__()
+    self.num_classes = num_classes
+    self.epsilon = epsilon
+    self.logsoftmax = nn.LogSoftmax(dim=1)
+    self.FREC = torch.Tensor(frequence).cuda()
+    self.weighted = weighted
+    
+  def forward(self, inputs, targets):
+    log_probs = self.logsoftmax(inputs)
+    targets = torch.zeros_like(log_probs).scatter_(1, targets.unsqueeze(1), 1)
+    targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
+    if(self.weighted):
+        loss = (-targets * log_probs / self.num_classes / self.FREC).mean(0).sum()
+    else:
+        loss = -(targets * log_probs).mean(0).sum()
+    return loss
 
 # Training settings
 parser = argparse.ArgumentParser(description='RecVis A3 training script')
@@ -65,6 +84,20 @@ model = Network(36, 200,
                       input_size = 32)
 
 model.cuda()
+def get_frequency():
+    with torch.no_grad():
+        count = []
+        for batch_idx, (data, target) in enumerate(train_loader):
+            count.append(target.data.cpu().numpy())
+        import numpy as np
+        count = np.sum(np.array(count), axis = 0)
+        return count/np.sum(count)
+frequency = get_frequency()
+num_class = frequency.shape[0]
+print(frequency)
+print(num_class)
+
+criterion_train = CrossEntropyLabelSmooth(num_class, 0.1, frequency, True)
 
 optimizer = torch.optim.SGD(
           model.parameters(),
@@ -72,9 +105,14 @@ optimizer = torch.optim.SGD(
           momentum=0.9,
           weight_decay=3e-4
           )
+
 epochs = args.epochs
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(epochs))
 drop_path_prob = 0.2
+
+
+        
+        
 def train(epoch):
     scheduler.step()
     model.train()
@@ -84,10 +122,11 @@ def train(epoch):
             data, target = data.cuda(), target.cuda()
         optimizer.zero_grad()
         output, output_aux = model(data)
-        criterion = torch.nn.CrossEntropyLoss(reduction='mean')
-        loss = criterion(output, target)
-        loss += 0.4 * criterion(output_aux, target)
+        #criterion = torch.nn.CrossEntropyLoss(reduction='mean')
+        loss = criterion_train(output, target)
+        loss += 0.4 * criterion_train(output_aux, target)
         loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), 5)
         optimizer.step()
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
