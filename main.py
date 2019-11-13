@@ -78,12 +78,7 @@ else:
 """
 from genotype import DARTS
 from NN import Network
-model = Network(36, 200, 
-                      20, True, DARTS, 
-                      num_reduction = 2, 
-                      input_size = 32)
 
-model.cuda()
 def get_frequency():
     import numpy as np
     with torch.no_grad():
@@ -98,9 +93,14 @@ def get_frequency():
 
 frequency = get_frequency()
 num_class = frequency.shape[0]
-print(frequency)
-print(num_class)
+#print(frequency)
+#print(num_class)
+model = Network(36, num_class, 
+                      20, True, DARTS, 
+                      num_reduction = 2, 
+                      input_size = 32)
 
+model.cuda()
 criterion_train = CrossEntropyLabelSmooth(num_class, 0.1, frequency, True)
 
 optimizer = torch.optim.SGD(
