@@ -55,7 +55,7 @@ if not os.path.isdir(args.experiment):
 # Data initialization and loading
 from data import _data_transforms
 
-train_transforms, valid_transforms = _data_transforms(4)
+train_transforms, valid_transforms = _data_transforms(28)
 train_loader = torch.utils.data.DataLoader(
     datasets.ImageFolder(args.data + '/train_images',
                          transform=train_transforms),
@@ -95,13 +95,13 @@ frequency = get_frequency()
 num_class = frequency.shape[0]
 print(frequency)
 #print(num_class)
-model = Network(36, num_class, 
-                      20, True, DARTS, 
+model = Network(48, num_class, 
+                      14, True, DARTS, 
                       num_reduction = 2, 
-                      input_size = 32)
+                      input_size = 224)
 
 model.cuda()
-criterion_train = CrossEntropyLabelSmooth(num_class, 0.1, frequency, True)
+criterion_train = CrossEntropyLabelSmooth(num_class, 0, frequency, True)
 
 optimizer = torch.optim.SGD(
           model.parameters(),
@@ -112,11 +112,8 @@ optimizer = torch.optim.SGD(
 
 epochs = args.epochs
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(epochs))
-drop_path_prob = 0.2
+drop_path_prob = 0.4
 
-
-        
-        
 def train(epoch):
     scheduler.step()
     model.train()
@@ -128,7 +125,9 @@ def train(epoch):
         output, output_aux = model(data)
         #criterion = torch.nn.CrossEntropyLoss(reduction='mean')
         loss = criterion_train(output, target)
-        loss += 0.4 * criterion_train(output_aux, target)
+        loss_aux = criterion_train(output_aux, target)
+        #print(loss, loss_aux)
+        loss += 0.4 * loss_aux
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), 5)
         optimizer.step()
@@ -149,12 +148,13 @@ def validation():
             output, _ = model(data)
             # sum up batch loss
             criterion = torch.nn.CrossEntropyLoss(reduction='mean')
-            validation_loss += criterion(output, target).data.item()
+            #print(criterion(output, target).data.item())
+            validation_loss += criterion(output, target).data.item() * len(target.cpu().numpy())
             # get the index of the max log-probability
             pred = output.data.max(1, keepdim=True)[1]
             correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
-    validation_loss /= len(val_loader.dataset)
+    validation_loss = validation_loss/len(val_loader.dataset)
     print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
         validation_loss, correct, len(val_loader.dataset),
         100. * correct / len(val_loader.dataset)))

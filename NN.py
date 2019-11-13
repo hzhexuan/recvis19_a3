@@ -158,7 +158,10 @@ class Network(nn.Module):
         C_to_auxiliary = C_prev
 
     if auxiliary:
-      self.auxiliary_head = AuxiliaryHead(C_to_auxiliary, num_classes)
+      if(self.input_size == 224):
+        self.auxiliary_head = AuxiliaryHeadImageNet(C_to_auxiliary, num_classes)
+      else:
+        self.auxiliary_head = AuxiliaryHead(C_to_auxiliary, num_classes)
     self.global_pooling = nn.AdaptiveAvgPool2d(1)
     self.classifier = nn.Linear(C_prev, num_classes)
 
@@ -171,6 +174,7 @@ class Network(nn.Module):
         s0 = s1 = self.stem(input)
     for i, cell in enumerate(self.cells):
       s0, s1 = s1, cell(s0, s1, self.drop_path_prob)
+      #print(list(s1.size()))
       if i == 2*self._layers//3:
         if self._auxiliary and self.training:
           logits_aux = self.auxiliary_head(s1)
