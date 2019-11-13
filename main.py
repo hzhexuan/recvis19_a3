@@ -64,6 +64,8 @@ model = Network(36, 200,
                       num_reduction = 2, 
                       input_size = 32)
 
+model.cuda()
+
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
 def train(epoch):
