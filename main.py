@@ -95,11 +95,17 @@ frequency = get_frequency()
 num_class = frequency.shape[0]
 print(frequency)
 #print(num_class)
+
+
 model = Network(48, num_class, 
                       14, True, DARTS, 
                       num_reduction = 2, 
                       input_size = 224)
-
+"""
+import torchvision.models as models
+model = models.resnet18(pretrained=True)
+model.fc = nn.Linear(512, num_class)
+"""
 model.cuda()
 criterion_train = CrossEntropyLabelSmooth(num_class, 0, frequency, True)
 

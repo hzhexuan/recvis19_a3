@@ -2,7 +2,7 @@ import argparse
 from tqdm import tqdm
 import os
 import PIL.Image as Image
-
+import torch.nn as nn
 import torch
 
 from model import Net
@@ -19,7 +19,10 @@ args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
 
 state_dict = torch.load(args.model)
-model = Net()
+import torchvision.models as models
+model = models.resnext101_32x8d(pretrained=False)
+model.fc = nn.Linear(2048, 20)
+
 model.load_state_dict(state_dict)
 model.eval()
 if use_cuda:
