@@ -5,8 +5,6 @@ import PIL.Image as Image
 import torch.nn as nn
 import torch
 
-from model import Net
-
 parser = argparse.ArgumentParser(description='RecVis A3 evaluation script')
 parser.add_argument('--data', type=str, default='bird_dataset', metavar='D',
                     help="folder where data is located. test_images/ need to be found in the folder")
@@ -22,6 +20,8 @@ use_cuda = torch.cuda.is_available()
 state_dict = torch.load(args.model)
 import torchvision.models as models
 
+if(args.network == "resnext"):
+    model = models.resnext101_32x8d(pretrained=True)
 if(args.network == "resnet152"):
     model = models.resnet152(pretrained=False)
 if(args.network == "inceptionv3"):

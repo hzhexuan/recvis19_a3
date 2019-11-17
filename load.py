@@ -109,6 +109,8 @@ model = Network(48, num_class,
 """
 import torchvision.models as models
 #model = models.resnet18(pretrained=True)
+if(args.network == "resnext"):
+    model = models.resnext101_32x8d(pretrained=True)
 if(args.network == "resnet152"):
     model = models.resnet152(pretrained=False)
 if(args.network == "inceptionv3"):
