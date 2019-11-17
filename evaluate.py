@@ -24,6 +24,8 @@ import torchvision.models as models
 
 if(args.network == "resnet152"):
     model = models.resnet152(pretrained=False)
+if(args.network == "inceptionv3"):
+    model = models.resnet152(pretrained=True)
 model.fc = nn.Linear(2048, 20)
 
 model.load_state_dict(state_dict)
@@ -34,7 +36,7 @@ if use_cuda:
 else:
     print('Using CPU')
 
-from data import _data_transforms
+from data import _data_transforms, _data_transforms299
 
 test_dir = args.data + '/test_images/mistery_category'
 
@@ -44,7 +46,10 @@ def pil_loader(path):
         with Image.open(f) as img:
             return img.convert('RGB')
 
-_, data_transforms = _data_transforms(0)
+if(args.network == "inceptionv3"):
+    _, data_transforms = _data_transforms299(0)
+else:
+    _, data_transforms = _data_transforms(0)
 output_file = open(args.outfile, "w")
 output_file.write("Id,Category\n")
 for f in tqdm(os.listdir(test_dir)):

@@ -52,6 +52,32 @@ def _data_transforms(cutout_length):
     ])
   return train_transform, valid_transform
 
+def _data_transforms299(cutout_length):
+  MEAN = [0.485, 0.456, 0.406]
+  STD = [0.229, 0.224, 0.225]
+
+  train_transform = transforms.Compose([
+    transforms.RandomResizedCrop(299),
+    transforms.RandomCrop(299, padding=28),
+    #transforms.ColorJitter(
+    #    brightness=0.4,
+    #    contrast=0.4,
+    #    saturation=0.4,
+    #    hue=0.2),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(MEAN, STD),
+  ])
+  train_transform.transforms.append(Cutout(cutout_length))
+
+  valid_transform = transforms.Compose([
+    transforms.Resize(299),
+    transforms.CenterCrop(299),
+    transforms.ToTensor(),
+    transforms.Normalize(MEAN, STD),
+    ])
+  return train_transform, valid_transform
+
 # once the images are loaded, how do we pre-process them before being passed into the network
 # by default, we resize the images to 64 x 64 in size
 # and normalize them to mean = 0 and standard-deviation = 1 based on statistics collected from
