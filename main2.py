@@ -110,7 +110,7 @@ import torchvision.models as models
 if(args.network == "resnet152"):
     model = models.resnet152(pretrained=True)
 if(args.network == "inceptionv3"):
-    model = models.resnet152(pretrained=True)
+    model = models.inception_v3(pretrained=True)
 model.fc = nn.Linear(2048, num_class)
 model.cuda()
 from torchsummary import summary

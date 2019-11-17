@@ -59,7 +59,10 @@ if not os.path.isdir(args.experiment):
 # Data initialization and loading
 from data import _data_transforms
 
-train_transforms, valid_transforms = _data_transforms(args.cutout)
+if(args.network == "inceptionv3"):
+    train_transforms, valid_transforms = _data_transforms299(args.cutout)
+else:
+    train_transforms, valid_transforms = _data_transforms(args.cutout)
 train_loader = torch.utils.data.DataLoader(
     datasets.ImageFolder(args.data + '/train_images',
                          transform=train_transforms),
@@ -108,6 +111,8 @@ import torchvision.models as models
 #model = models.resnet18(pretrained=True)
 if(args.network == "resnet152"):
     model = models.resnet152(pretrained=False)
+if(args.network == "inceptionv3"):
+    model = models.inception_v3(pretrained=True)
 model.fc = nn.Linear(2048, num_class)
 model.cuda()
 state_dict = torch.load(args.load)
