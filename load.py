@@ -46,6 +46,7 @@ parser.add_argument('--experiment', type=str, default='experiment', metavar='E',
                     help='folder where experiment outputs are located.')
 parser.add_argument('--freeze', type=int, default=8)
 parser.add_argument('--cutout', type=int, default=56)
+parser.add_argument('--load', type=str, default="")
 parser.add_argument('--network', type=str, default='resnet152')
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
@@ -106,9 +107,11 @@ model = Network(48, num_class,
 import torchvision.models as models
 #model = models.resnet18(pretrained=True)
 if(args.network == "resnet152"):
-    model = models.resnet152(pretrained=True)
+    model = models.resnet152(pretrained=False)
 model.fc = nn.Linear(2048, num_class)
 model.cuda()
+state_dict = torch.load(args.load)
+model.load_state_dict(state_dict)
 from torchsummary import summary
 summary(model, (3,224,224))
 
@@ -188,3 +191,10 @@ for epoch in range(1, args.epochs + 1):
 model_file = '../gdrive/My Drive/experiment/model_' + str(epoch) + '.pth'
 torch.save(model.state_dict(), model_file)
 print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' + model_file + '` to generate the Kaggle formatted csv file\n')
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 16 11:20:32 2019
+
+@author: hzhexuan
+"""
+

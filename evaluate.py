@@ -14,13 +14,16 @@ parser.add_argument('--model', type=str, metavar='M',
                     help="the model file to be evaluated. Usually it is of the form model_X.pth")
 parser.add_argument('--outfile', type=str, default='experiment/kaggle.csv', metavar='D',
                     help="name of the output csv file")
+parser.add_argument('--network', type=str, default='resnet152')
 
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
 
 state_dict = torch.load(args.model)
 import torchvision.models as models
-model = models.resnext101_32x8d(pretrained=False)
+
+if(args.network == "resnet152"):
+    model = models.resnet152(pretrained=False)
 model.fc = nn.Linear(2048, 20)
 
 model.load_state_dict(state_dict)
