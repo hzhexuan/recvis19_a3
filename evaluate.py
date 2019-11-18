@@ -19,7 +19,8 @@ use_cuda = torch.cuda.is_available()
 
 state_dict = torch.load(args.model)
 import torchvision.models as models
-
+if(args.network == "wideresnet"):
+    model = models.wide_resnet101_2(pretrained=True)
 if(args.network == "resnext"):
     model = models.resnext101_32x8d(pretrained=True)
 if(args.network == "resnet152"):
