@@ -33,11 +33,11 @@ def _data_transforms(cutout_length):
   train_transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
     transforms.RandomCrop(224, padding=28),
-    #transforms.ColorJitter(
-    #    brightness=0.4,
-    #    contrast=0.4,
-    #    saturation=0.4,
-    #    hue=0.2),
+    transforms.ColorJitter(
+        brightness=0.4,
+        contrast=0.4,
+        saturation=0.4,
+        hue=0.2),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize(MEAN, STD),
