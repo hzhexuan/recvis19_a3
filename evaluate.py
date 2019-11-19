@@ -19,15 +19,21 @@ use_cuda = torch.cuda.is_available()
 
 state_dict = torch.load(args.model)
 import torchvision.models as models
+if(args.network == "densenet161"):
+    model = models.densenet161(pretrained=True)
+    model.classifier = nn.Linear(2208, 20)
 if(args.network == "wideresnet"):
     model = models.wide_resnet101_2(pretrained=True)
+    model.fc = nn.Linear(2048, 20)
 if(args.network == "resnext"):
     model = models.resnext101_32x8d(pretrained=True)
+    model.fc = nn.Linear(2048, 20)
 if(args.network == "resnet152"):
     model = models.resnet152(pretrained=False)
+    model.fc = nn.Linear(2048, 20)
 if(args.network == "inceptionv3"):
     model = models.inception_v3(pretrained=True)
-model.fc = nn.Linear(2048, 20)
+    model.fc = nn.Linear(2048, 20)
 
 model.load_state_dict(state_dict)
 model.eval()

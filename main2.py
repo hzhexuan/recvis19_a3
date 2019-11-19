@@ -107,15 +107,22 @@ model = Network(48, num_class,
 """
 import torchvision.models as models
 #model = models.resnet18(pretrained=True)
+if(args.network == "densenet161"):
+    model = models.densenet161(pretrained=True)
+    model.classifier = nn.Linear(2208, num_class)
 if(args.network == "wideresnet"):
     model = models.wide_resnet101_2(pretrained=True)
+    model.fc = nn.Linear(2048, num_class)
 if(args.network == "resnext"):
     model = models.resnext101_32x8d(pretrained=True)
+    model.fc = nn.Linear(2048, num_class)
 if(args.network == "resnet152"):
     model = models.resnet152(pretrained=True)
+    model.fc = nn.Linear(2048, num_class)
 if(args.network == "inceptionv3"):
     model = models.inception_v3(pretrained=True)
-model.fc = nn.Linear(2048, num_class)
+    model.fc = nn.Linear(2048, num_class)
+
 model.cuda()
 from torchsummary import summary
 summary(model, (3,224,224))

@@ -16,20 +16,26 @@ use_cuda = torch.cuda.is_available()
 
 #state_dict = torch.load(args.model)
 import torchvision.models as models
-model_path = ['../gdrive/My Drive/experiment/wideresnet.pth', '../gdrive/My Drive/experiment/resnext101.pth']
-networks = ["wideresnet", "resnext"]
+model_path = ['../gdrive/My Drive/experiment/wideresnet.pth', '../gdrive/My Drive/experiment/resnext101.pth', '../gdrive/My Drive/experiment/resnet152.pth', '../gdrive/My Drive/experiment/densenet161.pth']
+networks = ["wideresnet", "resnext", "resnet152", "densenet161"]
 
 model_cache = []
+num_class = 20
 for i in range(len(model_path)):
     path = model_path[i]
     network = networks[i]
+    if(network == "densenet161"):
+        model = models.densenet161(pretrained=False)
+        model.classifier = nn.Linear(2208, num_class)
     if(network == "wideresnet"):
-        model = models.wide_resnet101_2(pretrained=True)
+        model = models.wide_resnet101_2(pretrained=False)
+        model.fc = nn.Linear(2048, num_class)
     if(network == "resnext"):
-        model = models.resnext101_32x8d(pretrained=False) 
+        model = models.resnext101_32x8d(pretrained=False)
+        model.fc = nn.Linear(2048, num_class)
     if(network == "resnet152"):
         model = models.resnet152(pretrained=False)
-    model.fc = nn.Linear(2048, 20)
+        model.fc = nn.Linear(2048, num_class)
     model.load_state_dict(torch.load(path))
     model.cuda()
     model.eval()
