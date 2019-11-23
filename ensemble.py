@@ -16,8 +16,8 @@ use_cuda = torch.cuda.is_available()
 
 #state_dict = torch.load(args.model)
 import torchvision.models as models
-model_path = ['../gdrive/My Drive/experiment/wideresnet.pth', '../gdrive/My Drive/experiment/resnext101.pth', '../gdrive/My Drive/experiment/resnet152.pth', '../gdrive/My Drive/experiment/densenet161.pth']
-networks = ["wideresnet", "resnext", "resnet152", "densenet161"]
+model_path = ['../gdrive/My Drive/experiment/wideresnet.pth', '../gdrive/My Drive/experiment/resnext101.pth', '../gdrive/My Drive/experiment/densenet161.pth']
+networks = ["wideresnet", "resnext", "densenet161"]
 
 model_cache = []
 num_class = 20

@@ -46,7 +46,6 @@ parser.add_argument('--experiment', type=str, default='experiment', metavar='E',
                     help='folder where experiment outputs are located.')
 parser.add_argument('--freeze', type=int, default=8)
 parser.add_argument('--cutout', type=int, default=56)
-parser.add_argument('--load', type=str, default="")
 parser.add_argument('--network', type=str, default='resnet152')
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
@@ -57,8 +56,7 @@ if not os.path.isdir(args.experiment):
     os.makedirs(args.experiment)
 
 # Data initialization and loading
-from data import _data_transforms
-
+from data import _data_transforms, _data_transforms299
 if(args.network == "inceptionv3"):
     train_transforms, valid_transforms = _data_transforms299(args.cutout)
 else:
@@ -99,14 +97,7 @@ def get_frequency():
 frequency = get_frequency()
 num_class = frequency.shape[0]
 print(frequency)
-#print(num_class)
 
-"""
-model = Network(48, num_class, 
-                      14, True, DARTS, 
-                      num_reduction = 2, 
-                      input_size = 224)
-"""
 import torchvision.models as models
 #model = models.resnet18(pretrained=True)
 if(args.network == "mnasnet"):
@@ -122,15 +113,13 @@ if(args.network == "resnext"):
     model = models.resnext101_32x8d(pretrained=True)
     model.fc = nn.Linear(2048, num_class)
 if(args.network == "resnet152"):
-    model = models.resnet152(pretrained=False)
+    model = models.resnet152(pretrained=True)
     model.fc = nn.Linear(2048, num_class)
 if(args.network == "inceptionv3"):
     model = models.inception_v3(pretrained=True)
     model.fc = nn.Linear(2048, num_class)
 
 model.cuda()
-state_dict = torch.load(args.load)
-model.load_state_dict(state_dict)
 from torchsummary import summary
 summary(model, (3,224,224))
 
@@ -210,10 +199,3 @@ for epoch in range(1, args.epochs + 1):
 model_file = '../gdrive/My Drive/experiment/model_' + str(epoch) + '.pth'
 torch.save(model.state_dict(), model_file)
 print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' + model_file + '` to generate the Kaggle formatted csv file\n')
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 16 11:20:32 2019
-
-@author: hzhexuan
-"""
-
